@@ -1,3 +1,1758 @@
-# 바운더리 일정관리 _TRUS
 
-바운더리 개념 기반 일정관리 대시보드.
+[index.html](https://github.com/user-attachments/files/27029429/index.html)
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>바운더리 일정관리 _TRUS</title>
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --surface-2: #f7f8fa;
+    --border: #eceef1;
+    --border-strong: #d8dce1;
+    --text: #191f28;
+    --text-dim: #4e5968;
+    --text-subtle: #8b95a1;
+
+    --pink: #ff0099;
+    --pink-hover: #e60089;
+    --pink-bg: #fff0f8;
+    --pink-bg-strong: #ffd6ec;
+    --pink-soft: #ff7cc2;
+    --pink-soft-bg: #fff5fa;
+    --pink-soft-strong: #ffb3dd;
+
+    --mute: #8b95a1;
+    --mute-bg: #f3f4f6;
+    --mute-strong: #d8dce1;
+
+    --green: #10b981;
+    --green-bg: #e7faf2;
+
+    --shadow-sm: 0 1px 2px rgba(23,27,32,0.03);
+    --shadow: 0 2px 12px rgba(23,27,32,0.05);
+    --shadow-lg: 0 6px 24px rgba(23,27,32,0.07);
+    --radius: 16px;
+  }
+  [data-theme="dark"] {
+    --bg: #0f1115;
+    --surface: #1a1d24;
+    --surface-2: #20242c;
+    --border: #2a2e36;
+    --border-strong: #3a3f48;
+    --text: #f0f2f5;
+    --text-dim: #a8b2bd;
+    --text-subtle: #6b7480;
+    --pink: #ff3ba6;
+    --pink-hover: #ff61b9;
+    --pink-bg: #3a0f27;
+    --pink-bg-strong: #5a1a3d;
+    --pink-soft: #ff9dcb;
+    --pink-soft-bg: #2a1524;
+    --pink-soft-strong: #4a2036;
+    --mute: #6b7480;
+    --mute-bg: #2a2e36;
+    --mute-strong: #3a3f48;
+    --green: #34d399;
+    --green-bg: #14291f;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+    --shadow: 0 2px 12px rgba(0,0,0,0.35);
+    --shadow-lg: 0 6px 24px rgba(0,0,0,0.5);
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--bg); }
+  body {
+    margin: 0;
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+    color: var(--text);
+    line-height: 1.5;
+    padding: 28px 24px 60px;
+    max-width: 1280px;
+    margin: 0 auto;
+    letter-spacing: -0.01em;
+  }
+  h1 { margin: 0; font-weight: 700; letter-spacing: -0.025em; }
+  input, textarea, button, select { font-family: inherit; font-size: 14px; color: var(--text); letter-spacing: -0.01em; }
+
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+  .topbar h1 { font-size: 22px; }
+  .brand-suffix { color: var(--pink); font-weight: 800; }
+  .icon-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 9px 14px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .icon-btn:hover { background: var(--surface-2); }
+
+  .project-tabs {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .project-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .project-tab:hover { background: var(--surface-2); }
+  .project-tab.active {
+    background: var(--pink);
+    color: white;
+    border-color: var(--pink);
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(255,0,153,0.25);
+  }
+  .project-tab.active .tab-name { color: white; }
+  .project-tab .tab-name {
+    border: none;
+    background: transparent;
+    color: inherit;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: inherit;
+    outline: none;
+    min-width: 40px;
+    max-width: 180px;
+    padding: 0;
+  }
+  .project-tab.active .tab-name {
+    border-bottom: 1px dashed rgba(255,255,255,0.5);
+    padding-bottom: 1px;
+  }
+  .tab-action {
+    background: rgba(255,255,255,0.18);
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    font-size: 12px;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tab-action:hover { background: rgba(255,255,255,0.35); }
+  .add-project-btn {
+    padding: 8px 14px;
+    border-radius: 999px;
+    border: 1px dashed var(--border-strong);
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-subtle);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .add-project-btn:hover { background: var(--surface); color: var(--pink); border-color: var(--pink); }
+  .edit-hint { font-size: 11px; color: var(--text-subtle); margin-left: 4px; }
+
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .card-title { font-size: 13px; color: var(--text-dim); font-weight: 700; }
+  .card-hint { font-size: 12px; color: var(--text-subtle); }
+
+  .goal-input {
+    width: 100%;
+    font-size: 22px;
+    font-weight: 700;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    outline: none;
+    padding: 6px 0;
+    letter-spacing: -0.025em;
+  }
+  .goal-input::placeholder { color: var(--text-subtle); font-weight: 500; }
+
+  /* Work diagram */
+  .work-diagram { position: relative; width: 100%; padding: 4px 0 0; }
+  .diagram-title {
+    text-align: center;
+    font-weight: 700;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    font-size: 15px;
+  }
+  .diagram-stage { position: relative; min-height: 250px; }
+  .diagram-svg { width: 100%; height: 140px; display: block; }
+  .problem-row {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 72%;
+    max-width: 420px;
+    justify-content: center;
+    z-index: 3;
+  }
+  .problem-row label { font-weight: 700; font-size: 14px; }
+  .problem-row input {
+    flex: 1;
+    border: none;
+    border-bottom: 1.5px solid var(--border);
+    background: var(--surface);
+    padding: 5px 6px;
+    font-size: 13px;
+    outline: none;
+    color: var(--text);
+  }
+  .problem-row input:focus { border-bottom-color: var(--pink); }
+  .diagram-middle-text {
+    position: absolute;
+    top: 62px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--pink);
+    font-weight: 800;
+    font-size: 13px;
+    background: var(--surface);
+    padding: 3px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  /* 아치 끝점 바로 밑에 위치 */
+  .tick-label { position: absolute; top: 126px; font-size: 12px; line-height: 1.4; }
+  .tick-label.tick-left {
+    left: 5%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
+  .tick-label.tick-right {
+    right: 5%;
+    text-align: right;
+  }
+  .tick-label .tag { font-weight: 800; font-size: 13px; }
+  .tick-label .sub { color: var(--text-subtle); font-size: 11px; margin-top: 2px; margin-bottom: 8px; }
+  .tick-label .lang-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 6px;
+    white-space: nowrap;
+  }
+  .tick-label .lang-item span {
+    color: var(--pink);
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .tick-label .lang-item input {
+    border: none;
+    border-bottom: 1.5px solid var(--border);
+    background: transparent;
+    padding: 3px 4px;
+    width: 160px;
+    font-size: 13px;
+    outline: none;
+    color: var(--text);
+  }
+  .tick-label .lang-item input:focus { border-bottom-color: var(--pink); }
+
+  /* Boundary + Principles */
+  .boundary-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 900px) { .boundary-row { grid-template-columns: 1fr; } }
+  .boundary-card {
+    background: linear-gradient(135deg, #191f28 0%, #2c1325 100%);
+    color: white;
+    padding: 26px 28px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .boundary-card::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle, rgba(255,0,153,0.3) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .boundary-label {
+    color: var(--pink);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    position: relative; z-index: 1;
+  }
+  .boundary-decl {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: -0.025em;
+    width: 100%;
+    border: none;
+    background: transparent;
+    color: white;
+    outline: none;
+    resize: none;
+    min-height: 32px;
+    position: relative; z-index: 1;
+  }
+  .boundary-decl::placeholder { color: rgba(255,255,255,0.4); }
+  .boundary-meta {
+    display: flex;
+    gap: 14px;
+    font-size: 13px;
+    opacity: 0.88;
+    margin-top: 18px;
+    align-items: center;
+    flex-wrap: wrap;
+    position: relative; z-index: 1;
+  }
+  .boundary-meta input[type="date"] {
+    border: none;
+    background: transparent;
+    color: white;
+    font-size: 13px;
+    color-scheme: dark;
+  }
+  .dday {
+    background: var(--pink);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 12px;
+  }
+  .progress {
+    height: 6px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 14px;
+    position: relative; z-index: 1;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--pink), #ff5cbf);
+    transition: width 0.4s;
+    border-radius: 999px;
+  }
+  .progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    opacity: 0.75;
+    margin-top: 7px;
+    position: relative; z-index: 1;
+  }
+  .notion-link { color: inherit; text-decoration: none; font-size: 12px; opacity: 0.7; }
+
+  .principles-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 26px;
+    box-shadow: var(--shadow-sm);
+  }
+  .principles-title {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 1.5px;
+    margin-bottom: 18px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .principle-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .principle-row:last-child { border-bottom: none; }
+  .principle-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--pink);
+    color: white;
+    font-weight: 800;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .principle-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    resize: none;
+    min-height: 26px;
+    line-height: 1.5;
+  }
+  .principle-input::placeholder { color: var(--text-subtle); font-weight: 400; }
+
+  /* Calendar */
+  .cal-nav { display: flex; gap: 8px; align-items: center; font-size: 15px; font-weight: 700; }
+  .cal-nav button {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 30px; height: 30px;
+    cursor: pointer;
+    padding: 0;
+    color: var(--text-dim);
+  }
+  .cal-nav button:hover { background: var(--pink-bg); color: var(--pink); border-color: var(--pink); }
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+    background: var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .cal-header {
+    background: var(--surface-2);
+    text-align: center;
+    padding: 10px 4px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-subtle);
+    text-transform: uppercase;
+  }
+  .cal-header.sun { color: #ef4444; }
+  .cal-header.sat { color: #3b82f6; }
+  .cal-day {
+    background: var(--surface);
+    min-height: 88px;
+    padding: 7px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    position: relative;
+  }
+  .cal-day:hover { background: var(--surface-2); }
+  .cal-day.other-month { opacity: 0.3; }
+  .cal-day.today { background: var(--pink-bg); }
+  .cal-day.today .cal-date { color: var(--pink); font-weight: 800; }
+  .cal-date { font-size: 12px; font-weight: 600; }
+  .cal-date.sun { color: #ef4444; }
+  .cal-date.sat { color: #3b82f6; }
+  .cal-event {
+    background: var(--pink-bg);
+    color: var(--pink);
+    border-left: 2px solid var(--pink);
+    padding: 3px 5px;
+    border-radius: 4px;
+    font-size: 10px;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .cal-event.priority {
+    background: var(--pink);
+    color: white;
+    border-left-color: white;
+    font-weight: 800;
+    box-shadow: 0 1px 3px rgba(255,0,153,0.3);
+  }
+  .cal-priority-strip {
+    display: flex;
+    gap: 3px;
+    justify-content: flex-end;
+    margin-top: auto;
+    padding-top: 2px;
+  }
+  .priority-badge {
+    background: var(--pink);
+    color: white;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 999px;
+    min-width: 18px;
+    text-align: center;
+  }
+
+  /* Today tasks */
+  .add-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--surface-2);
+    border: 1.5px solid transparent;
+    border-radius: 12px;
+    outline: none;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .add-input:focus {
+    background: var(--surface);
+    border-color: var(--pink);
+    box-shadow: 0 0 0 4px var(--pink-bg);
+  }
+  .tasks-3col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+  }
+  @media (max-width: 900px) { .tasks-3col { grid-template-columns: 1fr; } }
+  .task-col {
+    background: var(--surface-2);
+    border-radius: 12px;
+    padding: 14px;
+    min-height: 180px;
+    border-top: 3px solid;
+  }
+  .task-col.pruned { border-color: var(--mute); }
+  .task-col.e80 { border-color: var(--pink); }
+  .task-col.e20 { border-color: var(--pink-soft); }
+  .task-col-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 4px;
+  }
+  .task-col.pruned .task-col-title { color: var(--mute); }
+  .task-col.e80 .task-col-title { color: var(--pink); }
+  .task-col.e20 .task-col-title { color: var(--pink-soft); }
+  .task-count {
+    background: currentColor;
+    color: var(--surface);
+    font-size: 11px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-weight: 800;
+  }
+  .task-col-desc {
+    font-size: 11px;
+    color: var(--text-subtle);
+    margin-bottom: 12px;
+    line-height: 1.4;
+    min-height: 30px;
+  }
+  .task-list { list-style: none; padding: 0; margin: 0; min-height: 4px; }
+  .task {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border-radius: 10px;
+    margin-bottom: 6px;
+    border: 1px solid var(--border);
+  }
+  .task input[type="checkbox"] {
+    width: 16px; height: 16px; cursor: pointer;
+    accent-color: var(--pink);
+  }
+  .task-text {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    outline: none;
+    font-size: 13px;
+    min-width: 0;
+  }
+  .task-text.done { text-decoration: line-through; color: var(--text-subtle); }
+  .cat-btn {
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    border-radius: 8px;
+    padding: 3px 7px;
+    font-size: 10px;
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--text-subtle);
+    white-space: nowrap;
+  }
+  .cat-btn.active.e80 { background: var(--pink); color: white; border-color: var(--pink); }
+  .cat-btn.active.e20 { background: var(--pink-soft); color: white; border-color: var(--pink-soft); }
+  .delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-subtle);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 4px;
+    line-height: 1;
+  }
+  .delete-btn:hover { color: var(--pink); }
+  .empty-state {
+    color: var(--text-subtle);
+    font-size: 12px;
+    text-align: center;
+    padding: 20px 0;
+    font-style: italic;
+  }
+
+  /* Weekly goals */
+  .weekly-goals { display: flex; flex-direction: column; gap: 8px; }
+  .weekly-goal-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface-2);
+    border-radius: 12px;
+    border-left: 3px solid var(--mute);
+  }
+  .weekly-goal-row.current {
+    background: var(--pink-bg);
+    border-left-color: var(--pink);
+  }
+  .weekly-goal-label {
+    min-width: 140px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-dim);
+  }
+  .weekly-goal-row.current .weekly-goal-label { color: var(--pink); }
+  .weekly-goal-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+    color: var(--text);
+  }
+
+  /* PDCA */
+  .pdca-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  @media (max-width: 700px) { .pdca-grid { grid-template-columns: 1fr 1fr; } }
+  .pdca-cell { background: var(--surface-2); border-radius: 12px; padding: 14px; }
+  .pdca-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .pdca-cell textarea {
+    width: 100%;
+    border: none;
+    background: transparent;
+    resize: vertical;
+    min-height: 80px;
+    outline: none;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .copy-btn {
+    background: var(--pink);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 16px;
+    box-shadow: 0 4px 14px rgba(255,0,153,0.25);
+  }
+  .copy-btn:hover { background: var(--pink-hover); }
+  .copy-btn.copied { background: var(--green); }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal.open { display: flex; }
+  .modal-content {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 24px;
+    min-width: 360px;
+    max-width: 460px;
+    width: 92%;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal-header { font-weight: 800; margin-bottom: 14px; font-size: 15px; }
+  .modal-hint {
+    font-size: 11px;
+    color: var(--text-subtle);
+    background: var(--surface-2);
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  .modal-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-2);
+    outline: none;
+    margin-bottom: 10px;
+  }
+  .modal-input:focus { border-color: var(--pink); background: var(--surface); }
+  .modal-event-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .modal-event-row > input[type="text"] { flex: 1; border: none; background: transparent; outline: none; color: var(--text); font-size: 13px; min-width: 0; }
+  .pri-btn {
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    border-radius: 6px;
+    width: 24px; height: 24px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-subtle);
+    padding: 0;
+  }
+  .pri-btn:hover { border-color: var(--pink); color: var(--pink); }
+  .pri-btn.active {
+    background: var(--pink);
+    color: white;
+    border-color: var(--pink);
+  }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+  .btn {
+    padding: 9px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    cursor: pointer;
+    font-weight: 600;
+  }
+
+  .week-nav { display: flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 700; color: var(--text-dim); }
+  .week-nav button {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    width: 28px; height: 28px;
+    cursor: pointer;
+    padding: 0;
+    color: var(--text-dim);
+  }
+  .week-nav button:hover { background: var(--pink-bg); color: var(--pink); border-color: var(--pink); }
+
+  /* ===== 모바일 반응형 ===== */
+  @media (max-width: 640px) {
+    body { padding: 16px 12px 40px; }
+    .topbar h1 { font-size: 17px; }
+    .topbar { gap: 4px; }
+    .icon-btn { padding: 7px 10px; font-size: 13px; }
+    .card { padding: 16px 14px; border-radius: 14px; }
+    .goal-input { font-size: 17px; }
+
+    /* 프로젝트 탭 가로 스크롤 */
+    .project-tabs {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 10px;
+      scrollbar-width: none;
+    }
+    .project-tabs::-webkit-scrollbar { display: none; }
+    .project-tab { flex-shrink: 0; }
+    .edit-hint { display: none; }
+
+    /* 다이어그램 축소 */
+    .diagram-stage { min-height: 230px; }
+    .diagram-svg { height: 110px; }
+    .diagram-middle-text { top: 48px; font-size: 11px; padding: 2px 8px; }
+    .tick-label { top: 100px; font-size: 11px; }
+    .tick-label .tag { font-size: 12px; }
+    .tick-label .sub { margin-bottom: 6px; }
+    .tick-label .lang-item input { width: 110px; font-size: 12px; }
+    .tick-label .lang-item span { font-size: 11px; }
+    .problem-row { width: 90%; max-width: 340px; }
+    .problem-row label { font-size: 13px; }
+
+    /* 바운더리 카드 */
+    .boundary-card { padding: 18px 18px; }
+    .boundary-decl { font-size: 16px; }
+    .principles-card { padding: 18px 18px; }
+
+    /* 캘린더 */
+    .cal-day { min-height: 58px; padding: 4px 3px; }
+    .cal-header { font-size: 10px; padding: 6px 2px; }
+    .cal-date { font-size: 11px; }
+    .cal-event { font-size: 9px; padding: 2px 3px; }
+
+    /* 오늘 할 일 모바일 - 이미 1열 */
+    .tasks-3col { gap: 10px; }
+    .task-col { padding: 12px; }
+
+    /* 주간 목표 */
+    .weekly-goal-label { min-width: 110px; font-size: 11px; }
+    .weekly-goal-row { padding: 10px 12px; }
+    .weekly-goal-input { font-size: 13px; }
+
+    /* PDCA 1열 */
+    .pdca-grid { grid-template-columns: 1fr; }
+    .copy-btn { width: 100%; }
+
+    /* 모달 */
+    .modal-content { padding: 18px; min-width: 0; }
+    .pri-btn { width: 28px; height: 28px; font-size: 12px; }
+    .modal-event-row > input[type="text"] { font-size: 14px; }
+  }
+
+  @media (max-width: 400px) {
+    .diagram-svg { height: 90px; }
+    .diagram-middle-text { top: 40px; }
+    .tick-label { top: 82px; }
+    .tick-label .lang-item input { width: 90px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>🎯 바운더리 일정관리 <span class="brand-suffix">_TRUS</span></h1>
+  <div style="display:flex; gap:6px;">
+    <button class="icon-btn" onclick="exportData()" title="JSON으로 내보내기 (백업/다른 기기 이동)">📤</button>
+    <button class="icon-btn" onclick="importData()" title="JSON 가져오기">📥</button>
+    <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+  </div>
+</div>
+
+<div class="project-tabs" id="projectTabs"></div>
+
+<!-- 2026 목표 -->
+<div class="card">
+  <div class="card-title">📅 2026년 나의 목표</div>
+  <input type="text" class="goal-input" id="yearGoal" placeholder="올해 꼭 이루고 싶은 것을 한 문장으로...">
+</div>
+
+<!-- 일은 시작과 끝 -->
+<div class="card">
+  <div class="work-diagram">
+    <div class="diagram-title">일은? 시작과 끝이 있다.</div>
+    <div class="diagram-stage">
+      <svg class="diagram-svg" viewBox="0 0 800 180" preserveAspectRatio="none">
+        <line x1="40" y1="140" x2="760" y2="140" stroke="currentColor" stroke-width="1.5" opacity="0.4"/>
+        <line x1="40" y1="128" x2="40" y2="155" stroke="currentColor" stroke-width="2"/>
+        <line x1="760" y1="128" x2="760" y2="155" stroke="currentColor" stroke-width="2"/>
+        <path d="M 40 140 Q 400 10 760 140" stroke="#ff0099" stroke-width="2.2" fill="none" stroke-dasharray="6,4"/>
+      </svg>
+      <div class="problem-row">
+        <label>문제:</label>
+        <input type="text" id="problem">
+      </div>
+      <div class="diagram-middle-text">함께 해결 = 일</div>
+      <!-- 그래프 시작점 바로 밑 -->
+      <div class="tick-label tick-left">
+        <div class="tag">시작</div>
+        <div class="sub">전략</div>
+      </div>
+      <!-- 그래프 끝점 바로 밑 + 성과 밑에 숫자/고객언어 세로 스택 -->
+      <div class="tick-label tick-right">
+        <div class="tag">끝</div>
+        <div class="sub">성과</div>
+        <div class="lang-item">
+          <span>숫자언어 :</span>
+          <input type="text" id="numberLang">
+        </div>
+        <div class="lang-item">
+          <span>고객언어 :</span>
+          <input type="text" id="customerLang">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 바운더리 + 3원칙 -->
+<div class="boundary-row">
+  <div class="boundary-card">
+    <div class="boundary-label">🎯 3개월 바운더리</div>
+    <textarea class="boundary-decl" id="boundaryDecl" rows="2" placeholder="이번 3개월에 반드시 달성할 한 가지를 선언하세요"></textarea>
+    <div class="boundary-meta">
+      <span>🗓 <input type="date" id="startDate"></span>
+      <span>→ <input type="date" id="endDate"></span>
+      <span class="dday" id="ddayDisplay">D-?</span>
+      <a class="notion-link" href="https://www.notion.so/3329073fdb968140a180da5e0a7bee53" target="_blank">Notion ↗</a>
+    </div>
+    <div class="progress"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-text">
+      <span id="progressText">0% 진행</span>
+      <span id="progressDays">0 / 0일</span>
+    </div>
+  </div>
+  <div class="principles-card">
+    <div class="principles-title">📜 3원칙</div>
+    <div class="principle-row">
+      <div class="principle-num">1</div>
+      <textarea class="principle-input" data-principle="0" rows="1" placeholder="첫 번째 원칙"></textarea>
+    </div>
+    <div class="principle-row">
+      <div class="principle-num">2</div>
+      <textarea class="principle-input" data-principle="1" rows="1" placeholder="두 번째 원칙"></textarea>
+    </div>
+    <div class="principle-row">
+      <div class="principle-num">3</div>
+      <textarea class="principle-input" data-principle="2" rows="1" placeholder="세 번째 원칙"></textarea>
+    </div>
+  </div>
+</div>
+
+<!-- 캘린더 (우선순위 뱃지 포함) -->
+<div class="card">
+  <div class="card-header">
+    <div>
+      <div class="card-title">📆 월간 캘린더</div>
+      <div class="card-hint" style="margin-top:4px;">날짜 클릭 → 일정 추가 + ①②③ 우선순위 설정 (새 1위 등록 시 2,3위 자동 밀림)</div>
+    </div>
+    <div class="cal-nav">
+      <button onclick="changeMonth(-1)">◀</button>
+      <span id="calMonthLabel"></span>
+      <button onclick="changeMonth(1)">▶</button>
+    </div>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+</div>
+
+<!-- 오늘 할 일: 80% / 20% / 가지치기 -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">✅ 오늘 할 일</div>
+    <div class="card-hint">먼저 전부 적고 → 🔥 / ⚡ 버튼으로 분류</div>
+  </div>
+  <input type="text" class="add-input" id="addTask" placeholder="+ 오늘 할 일 추가 (Enter)">
+  <div class="tasks-3col">
+    <div class="task-col e80">
+      <div class="task-col-title">🔥 80% 에너지 <span class="task-count" id="e80Count">0</span></div>
+      <div class="task-col-desc">핵심 일. 성과의 80%를 만든다.</div>
+      <ul class="task-list" id="e80List"></ul>
+    </div>
+    <div class="task-col e20">
+      <div class="task-col-title">⚡ 20% 에너지 <span class="task-count" id="e20Count">0</span></div>
+      <div class="task-col-desc">필요하지만 가볍게 처리.</div>
+      <ul class="task-list" id="e20List"></ul>
+    </div>
+    <div class="task-col pruned">
+      <div class="task-col-title">✂️ 가지치기 <span class="task-count" id="prunedCount">0</span></div>
+      <div class="task-col-desc">큰 에너지를 쓰면 안되는 일.</div>
+      <ul class="task-list" id="prunedList"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- 주간 성과 목표 -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">📊 이번 달 주간 성과 목표</div>
+    <div class="cal-nav">
+      <button onclick="changeMonth(-1)">◀</button>
+      <span id="goalsMonthLabel"></span>
+      <button onclick="changeMonth(1)">▶</button>
+    </div>
+  </div>
+  <div class="weekly-goals" id="weeklyGoals"></div>
+</div>
+
+<!-- PDCA -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">🔁 이번 주 PDCA</div>
+    <div class="week-nav">
+      <button onclick="changeWeek(-1)">◀</button>
+      <span id="weekLabel"></span>
+      <button onclick="changeWeek(1)">▶</button>
+    </div>
+  </div>
+  <div class="pdca-grid">
+    <div class="pdca-cell">
+      <div class="pdca-label">📋 Plan</div>
+      <textarea data-pdca="plan" placeholder="이번 주 뭘 할지..."></textarea>
+    </div>
+    <div class="pdca-cell">
+      <div class="pdca-label">🏃 Do</div>
+      <textarea data-pdca="do" placeholder="실제로 한 것..."></textarea>
+    </div>
+    <div class="pdca-cell">
+      <div class="pdca-label">🔍 Check</div>
+      <textarea data-pdca="check" placeholder="결과, 숫자, 시그널..."></textarea>
+    </div>
+    <div class="pdca-cell">
+      <div class="pdca-label">⚙️ Act</div>
+      <textarea data-pdca="act" placeholder="다음 주 개선점..."></textarea>
+    </div>
+  </div>
+  <button class="copy-btn" id="copyBtn" onclick="copyToNotion()">📋 이번 주 기록 Notion용으로 복사</button>
+</div>
+
+<!-- 모달 -->
+<div class="modal" id="eventModal">
+  <div class="modal-content">
+    <div class="modal-header" id="modalDate">날짜</div>
+    <div class="modal-hint">각 일정 옆 <b>1 / 2 / 3</b> 버튼 = 이번 달 우선순위 지정. 새로 1번에 등록하면 기존 1→2, 2→3으로 밀려납니다.</div>
+    <div id="modalEvents" style="margin-bottom:10px;"></div>
+    <input type="text" class="modal-input" id="newEventInput" placeholder="일정 추가 (Enter)">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function pad(n) { return String(n).padStart(2, '0'); }
+function dateKey(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function monthKey(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}`; }
+function getWeekKey(date) {
+  const d = new Date(date);
+  const day = d.getDay() || 7;
+  d.setDate(d.getDate() - day + 1);
+  return dateKey(d);
+}
+function getWeekRange(weekKey) {
+  const [y,m,d] = weekKey.split('-').map(Number);
+  const start = new Date(y, m-1, d);
+  const end = new Date(start); end.setDate(end.getDate() + 6);
+  const f = (x) => `${x.getMonth()+1}.${x.getDate()}`;
+  return `${f(start)} - ${f(end)}`;
+}
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+
+const KEY = 'boundary_trus_v3';
+
+function makeProject(name, preset = false) {
+  return {
+    name: name || '새 프로젝트',
+    yearGoal: '',
+    problem: '',
+    numberLang: '',
+    customerLang: '',
+    boundaryDecl: preset ? "2026년 4월 - 7월 | 3개월, 온라인 앤드엔 '만개' 판매를 달성한다." : '',
+    principles: ['', '', ''],
+    startDate: preset ? '2026-03-29' : dateKey(new Date()),
+    endDate: preset ? '2026-06-29' : (() => { const d = new Date(); d.setMonth(d.getMonth()+3); return dateKey(d); })(),
+    tasks: [],
+    events: {},          // { 'YYYY-MM-DD': [{text, priority: null|1|2|3}] }
+    pdca: {},
+    weeklyGoals: {},
+    currentWeek: getWeekKey(new Date()),
+    currentMonth: monthKey(new Date())
+  };
+}
+
+function initialState() {
+  const pid = uid();
+  return {
+    theme: 'light',
+    currentProjectId: pid,
+    projects: { [pid]: { ...makeProject('앤드엔 번들', true) } }
+  };
+}
+
+// 마이그레이션: string events → {text, priority} 객체
+function normalizeEvents(events) {
+  if (!events) return {};
+  const out = {};
+  Object.entries(events).forEach(([date, arr]) => {
+    out[date] = (arr || []).map(ev => {
+      if (typeof ev === 'string') return { text: ev, priority: null };
+      if (ev && typeof ev === 'object') return { text: ev.text || '', priority: ev.priority ?? null };
+      return { text: String(ev), priority: null };
+    });
+  });
+  return out;
+}
+
+function migrate(old) {
+  if (old && !old.projects) {
+    const pid = uid();
+    return {
+      theme: old.theme || 'light',
+      currentProjectId: pid,
+      projects: {
+        [pid]: {
+          name: '앤드엔 번들',
+          yearGoal: old.yearGoal || '',
+          problem: old.problem || '',
+          numberLang: old.numberLang || '',
+          customerLang: old.customerLang || '',
+          boundaryDecl: old.boundaryDecl || '',
+          principles: old.principles || ['', '', ''],
+          startDate: old.startDate || '2026-03-29',
+          endDate: old.endDate || '2026-06-29',
+          tasks: (old.tasks || []).map(t => ({ ...t, category: t.category == null ? 'pruned' : t.category })),
+          events: normalizeEvents(old.events),
+          pdca: old.pdca || {},
+          weeklyGoals: old.weeklyGoals || {},
+          currentWeek: old.currentWeek || getWeekKey(new Date()),
+          currentMonth: old.currentMonth || monthKey(new Date())
+        }
+      }
+    };
+  }
+  if (old && old.projects) {
+    Object.values(old.projects).forEach(p => {
+      p.events = normalizeEvents(p.events);
+      (p.tasks || []).forEach(t => { if (t.category == null) t.category = 'pruned'; });
+      if (!p.principles) p.principles = ['', '', ''];
+      // 구버전 priorities 구조 제거 (더 이상 사용 안 함)
+      delete p.priorities;
+    });
+  }
+  return old;
+}
+
+let state;
+function loadState() {
+  try {
+    let s = JSON.parse(localStorage.getItem(KEY));
+    if (!s) {
+      const v2 = JSON.parse(localStorage.getItem('boundary_dashboard_v2'));
+      if (v2) return migrate(v2);
+      return initialState();
+    }
+    return migrate(s);
+  } catch { return initialState(); }
+}
+function saveState() { localStorage.setItem(KEY, JSON.stringify(state)); }
+state = loadState();
+saveState();
+
+function P() { return state.projects[state.currentProjectId]; }
+
+// 프로젝트 탭
+function renderProjectTabs() {
+  const container = document.getElementById('projectTabs');
+  container.innerHTML = '';
+  Object.entries(state.projects).forEach(([pid, p]) => {
+    const tab = document.createElement('div');
+    const isActive = pid === state.currentProjectId;
+    tab.className = 'project-tab' + (isActive ? ' active' : '');
+    const name = document.createElement('input');
+    name.type = 'text'; name.value = p.name; name.className = 'tab-name';
+    name.readOnly = !isActive;
+    name.style.width = Math.max(p.name.length * 10 + 10, 40) + 'px';
+    name.onclick = (e) => {
+      if (!isActive) { state.currentProjectId = pid; saveState(); render(); }
+      else e.stopPropagation();
+    };
+    name.oninput = () => {
+      p.name = name.value;
+      name.style.width = Math.max(name.value.length * 10 + 10, 40) + 'px';
+      saveState();
+    };
+    name.onkeydown = (e) => { if (e.key === 'Enter') name.blur(); };
+    tab.append(name);
+    if (isActive) {
+      const dup = document.createElement('button');
+      dup.className = 'tab-action'; dup.textContent = '⎘'; dup.title = '복제';
+      dup.onclick = (e) => {
+        e.stopPropagation();
+        const newId = uid();
+        state.projects[newId] = JSON.parse(JSON.stringify(p));
+        state.projects[newId].name = p.name + ' (복제)';
+        state.currentProjectId = newId;
+        saveState(); render();
+      };
+      const del = document.createElement('button');
+      del.className = 'tab-action'; del.textContent = '×'; del.title = '삭제';
+      del.onclick = (e) => {
+        e.stopPropagation();
+        if (Object.keys(state.projects).length === 1) { alert('프로젝트가 최소 1개는 있어야 해요.'); return; }
+        if (!confirm(`"${p.name}" 프로젝트를 삭제할까요?`)) return;
+        delete state.projects[pid];
+        if (state.currentProjectId === pid) state.currentProjectId = Object.keys(state.projects)[0];
+        saveState(); render();
+      };
+      tab.append(dup, del);
+    }
+    container.appendChild(tab);
+  });
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-project-btn'; addBtn.textContent = '+ 새 프로젝트';
+  addBtn.onclick = () => {
+    const newId = uid();
+    state.projects[newId] = makeProject('새 프로젝트');
+    state.currentProjectId = newId;
+    saveState(); render();
+  };
+  container.appendChild(addBtn);
+  const hint = document.createElement('span');
+  hint.className = 'edit-hint';
+  hint.textContent = '← 활성 탭 이름을 직접 클릭해서 수정';
+  container.appendChild(hint);
+}
+
+function render() {
+  document.documentElement.setAttribute('data-theme', state.theme);
+  document.getElementById('themeBtn').textContent = state.theme === 'dark' ? '☀️' : '🌙';
+  renderProjectTabs();
+  const p = P();
+  document.getElementById('yearGoal').value = p.yearGoal;
+  document.getElementById('problem').value = p.problem;
+  document.getElementById('numberLang').value = p.numberLang;
+  document.getElementById('customerLang').value = p.customerLang;
+  document.getElementById('boundaryDecl').value = p.boundaryDecl;
+  document.getElementById('startDate').value = p.startDate;
+  document.getElementById('endDate').value = p.endDate;
+  document.querySelectorAll('[data-principle]').forEach(el => {
+    el.value = (p.principles && p.principles[el.dataset.principle]) || '';
+  });
+  renderProgress();
+  renderTasks();
+  renderCalendar();
+  renderWeeklyGoals();
+  renderPDCA();
+}
+
+function renderProgress() {
+  const p = P();
+  const start = new Date(p.startDate);
+  const end = new Date(p.endDate);
+  const today = new Date();
+  const total = Math.max(1, Math.ceil((end - start) / 86400000));
+  const passed = Math.max(0, Math.ceil((today - start) / 86400000));
+  const remain = Math.max(0, Math.ceil((end - today) / 86400000));
+  const pct = Math.min(100, Math.max(0, Math.round(passed / total * 100)));
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = pct + '% 진행';
+  document.getElementById('progressDays').textContent = `${passed} / ${total}일`;
+  document.getElementById('ddayDisplay').textContent = remain > 0 ? `D-${remain}` : (remain === 0 ? 'D-DAY' : `D+${-remain}`);
+}
+
+// Tasks
+function renderTasks() {
+  const p = P();
+  const groups = {
+    e80: p.tasks.filter(t => t.category === '80'),
+    e20: p.tasks.filter(t => t.category === '20'),
+    pruned: p.tasks.filter(t => t.category === 'pruned')
+  };
+  const placeholders = {
+    e80: '아직 분류된 핵심 일 없음',
+    e20: '아직 분류된 20% 일 없음',
+    pruned: '여기에 쌓인 일이 없어요'
+  };
+  Object.entries({ e80:'e80List', e20:'e20List', pruned:'prunedList' }).forEach(([k, id]) => {
+    const el = document.getElementById(id);
+    el.innerHTML = '';
+    if (groups[k].length === 0) {
+      el.innerHTML = `<div class="empty-state">${placeholders[k]}</div>`;
+    } else {
+      groups[k].forEach(t => el.appendChild(taskEl(t)));
+    }
+  });
+  document.getElementById('e80Count').textContent = groups.e80.length;
+  document.getElementById('e20Count').textContent = groups.e20.length;
+  document.getElementById('prunedCount').textContent = groups.pruned.length;
+}
+
+function taskEl(t) {
+  const p = P();
+  const li = document.createElement('li');
+  li.className = 'task';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox'; cb.checked = t.done;
+  cb.onchange = () => { t.done = cb.checked; saveState(); renderTasks(); };
+  const text = document.createElement('input');
+  text.className = 'task-text' + (t.done ? ' done' : '');
+  text.value = t.text;
+  text.onchange = () => { t.text = text.value; saveState(); };
+  li.append(cb, text);
+  const b80 = document.createElement('button');
+  b80.className = 'cat-btn e80' + (t.category === '80' ? ' active' : '');
+  b80.textContent = '🔥';
+  b80.title = '80% 에너지로 분류';
+  b80.onclick = () => { t.category = t.category === '80' ? 'pruned' : '80'; saveState(); renderTasks(); };
+  const b20 = document.createElement('button');
+  b20.className = 'cat-btn e20' + (t.category === '20' ? ' active' : '');
+  b20.textContent = '⚡';
+  b20.title = '20% 에너지로 분류';
+  b20.onclick = () => { t.category = t.category === '20' ? 'pruned' : '20'; saveState(); renderTasks(); };
+  li.append(b80, b20);
+  const del = document.createElement('button');
+  del.className = 'delete-btn'; del.textContent = '×';
+  del.onclick = () => {
+    p.tasks = p.tasks.filter(x => x.id !== t.id);
+    saveState(); renderTasks();
+  };
+  li.append(del);
+  return li;
+}
+
+// ===== 우선순위 (캘린더 내부 표시) =====
+// 이번달 우선순위 설정. newPriority: null | 1 | 2 | 3
+function setEventPriority(date, index, newPriority) {
+  const p = P();
+  const month = date.slice(0, 7);
+  const target = p.events[date][index];
+  if (!target) return;
+
+  // 먼저 타겟의 기존 우선순위 제거
+  target.priority = null;
+
+  if (newPriority === null || newPriority === undefined) {
+    saveState();
+    return;
+  }
+
+  // 이번달 내 다른 이벤트 중 priority >= newPriority 인 것 수집
+  const affected = [];
+  Object.entries(p.events).forEach(([d, evs]) => {
+    if (d.slice(0,7) !== month) return;
+    (evs || []).forEach(e => {
+      if (e !== target && e.priority && e.priority >= newPriority) affected.push(e);
+    });
+  });
+  // 낮은 우선순위(=숫자 작은 것)부터 밀어야 함
+  affected.sort((a,b) => a.priority - b.priority);
+  affected.forEach(e => {
+    e.priority = e.priority + 1;
+    if (e.priority > 3) e.priority = null;
+  });
+  target.priority = newPriority;
+  saveState();
+}
+
+// Calendar
+function renderCalendar() {
+  const p = P();
+  const [yr, mo] = p.currentMonth.split('-').map(Number);
+  const firstDay = new Date(yr, mo-1, 1);
+  const lastDay = new Date(yr, mo, 0);
+  const startWeekday = firstDay.getDay();
+  const daysInMonth = lastDay.getDate();
+  const prevLastDay = new Date(yr, mo-1, 0).getDate();
+  const todayKey = dateKey(new Date());
+
+  document.getElementById('calMonthLabel').textContent = `${yr}년 ${mo}월`;
+  document.getElementById('goalsMonthLabel').textContent = `${yr}년 ${mo}월`;
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  ['일','월','화','수','목','금','토'].forEach((d,i) => {
+    const h = document.createElement('div');
+    h.className = 'cal-header' + (i===0?' sun':i===6?' sat':'');
+    h.textContent = d;
+    grid.appendChild(h);
+  });
+
+  const cells = [];
+  for (let i = 0; i < startWeekday; i++) {
+    const day = prevLastDay - startWeekday + 1 + i;
+    const pm = mo === 1 ? 12 : mo - 1;
+    const py = mo === 1 ? yr - 1 : yr;
+    cells.push({ day, year: py, month: pm, otherMonth: true });
+  }
+  for (let d = 1; d <= daysInMonth; d++) cells.push({ day: d, year: yr, month: mo, otherMonth: false });
+  let nextDay = 1;
+  while (cells.length < 42) {
+    const nm = mo === 12 ? 1 : mo + 1;
+    const ny = mo === 12 ? yr + 1 : yr;
+    cells.push({ day: nextDay++, year: ny, month: nm, otherMonth: true });
+  }
+
+  cells.forEach((c, idx) => {
+    const cell = document.createElement('div');
+    cell.className = 'cal-day' + (c.otherMonth ? ' other-month' : '');
+    const key = `${c.year}-${pad(c.month)}-${pad(c.day)}`;
+    if (key === todayKey) cell.classList.add('today');
+
+    const dateEl = document.createElement('div');
+    dateEl.className = 'cal-date';
+    const col = idx % 7;
+    if (col === 0) dateEl.classList.add('sun');
+    if (col === 6) dateEl.classList.add('sat');
+    dateEl.textContent = c.day;
+    cell.appendChild(dateEl);
+
+    // 이벤트 표시: 우선순위 있는 것 먼저
+    const events = (p.events[key] || []).slice();
+    events.sort((a,b) => {
+      const ap = a.priority || 99;
+      const bp = b.priority || 99;
+      return ap - bp;
+    });
+    const visible = events.slice(0, 3);
+    const badges = ['①','②','③'];
+    visible.forEach(ev => {
+      const e = document.createElement('div');
+      e.className = 'cal-event' + (ev.priority ? ' priority' : '');
+      const prefix = ev.priority ? `${badges[ev.priority-1]} ` : '';
+      e.textContent = prefix + ev.text;
+      e.title = ev.text;
+      cell.appendChild(e);
+    });
+    if (events.length > 3) {
+      const more = document.createElement('div');
+      more.style.fontSize = '10px';
+      more.style.color = 'var(--text-subtle)';
+      more.textContent = `+${events.length - 3}개 더`;
+      cell.appendChild(more);
+    }
+
+    cell.onclick = () => openEventModal(key);
+    grid.appendChild(cell);
+  });
+}
+
+function changeMonth(delta) {
+  const p = P();
+  const [y, m] = p.currentMonth.split('-').map(Number);
+  const d = new Date(y, m - 1 + delta, 1);
+  p.currentMonth = monthKey(d);
+  saveState();
+  renderCalendar();
+  renderWeeklyGoals();
+}
+
+// Weekly goals
+function getWeeksOfMonth(yearMonth) {
+  const [y, m] = yearMonth.split('-').map(Number);
+  const firstDay = new Date(y, m-1, 1);
+  const lastDay = new Date(y, m, 0);
+  const firstMonday = new Date(firstDay);
+  const dow = firstMonday.getDay() || 7;
+  firstMonday.setDate(firstMonday.getDate() - dow + 1);
+  const weeks = [];
+  let cur = new Date(firstMonday);
+  let weekNum = 1;
+  while (true) {
+    const weekEnd = new Date(cur); weekEnd.setDate(weekEnd.getDate() + 6);
+    if (cur > lastDay && weekEnd.getMonth() !== m-1) break;
+    weeks.push({ key: dateKey(cur), weekNum, start: new Date(cur), end: new Date(weekEnd) });
+    cur.setDate(cur.getDate() + 7);
+    weekNum++;
+    if (weekNum > 6) break;
+  }
+  return weeks;
+}
+
+function renderWeeklyGoals() {
+  const p = P();
+  const weeks = getWeeksOfMonth(p.currentMonth);
+  const todayWeek = getWeekKey(new Date());
+  const container = document.getElementById('weeklyGoals');
+  container.innerHTML = '';
+  weeks.forEach(w => {
+    const row = document.createElement('div');
+    row.className = 'weekly-goal-row' + (w.key === todayWeek ? ' current' : '');
+    const label = document.createElement('div');
+    label.className = 'weekly-goal-label';
+    const f = (d) => `${d.getMonth()+1}/${d.getDate()}`;
+    label.textContent = `${w.weekNum}주차 (${f(w.start)} - ${f(w.end)})`;
+    const input = document.createElement('input');
+    input.className = 'weekly-goal-input';
+    input.placeholder = '이 주의 성과 목표를 한 줄로...';
+    input.value = p.weeklyGoals[w.key] || '';
+    input.addEventListener('input', () => { p.weeklyGoals[w.key] = input.value; saveState(); });
+    row.append(label, input);
+    container.appendChild(row);
+  });
+}
+
+// Event modal with priority buttons
+let modalDate = null;
+function openEventModal(dateStr) {
+  modalDate = dateStr;
+  const [y,m,d] = dateStr.split('-');
+  document.getElementById('modalDate').textContent = `${y}년 ${parseInt(m)}월 ${parseInt(d)}일 일정`;
+  renderModalEvents();
+  document.getElementById('eventModal').classList.add('open');
+  document.getElementById('newEventInput').value = '';
+  document.getElementById('newEventInput').focus();
+}
+function closeModal() {
+  document.getElementById('eventModal').classList.remove('open');
+  renderCalendar();
+}
+function renderModalEvents() {
+  const p = P();
+  const list = document.getElementById('modalEvents');
+  list.innerHTML = '';
+  const events = p.events[modalDate] || [];
+  events.forEach((ev, i) => {
+    const row = document.createElement('div');
+    row.className = 'modal-event-row';
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.value = ev.text;
+    inp.onchange = () => { ev.text = inp.value; saveState(); renderCalendar(); };
+    row.append(inp);
+
+    [1,2,3].forEach(n => {
+      const btn = document.createElement('button');
+      btn.className = 'pri-btn' + (ev.priority === n ? ' active' : '');
+      btn.textContent = n;
+      btn.title = `이번달 ${n}순위로 등록`;
+      btn.onclick = () => {
+        setEventPriority(modalDate, i, ev.priority === n ? null : n);
+        renderModalEvents();
+        renderCalendar();
+      };
+      row.append(btn);
+    });
+
+    const del = document.createElement('button');
+    del.className = 'delete-btn'; del.textContent = '×';
+    del.onclick = () => {
+      p.events[modalDate].splice(i, 1);
+      if (p.events[modalDate].length === 0) delete p.events[modalDate];
+      saveState(); renderModalEvents(); renderCalendar();
+    };
+    row.append(del);
+    list.appendChild(row);
+  });
+}
+document.getElementById('newEventInput').addEventListener('keydown', e => {
+  const p = P();
+  if (e.key === 'Enter' && e.target.value.trim() && modalDate) {
+    if (!p.events[modalDate]) p.events[modalDate] = [];
+    p.events[modalDate].push({ text: e.target.value.trim(), priority: null });
+    e.target.value = '';
+    saveState(); renderModalEvents(); renderCalendar();
+  }
+});
+document.getElementById('eventModal').addEventListener('click', e => {
+  if (e.target.id === 'eventModal') closeModal();
+});
+
+// PDCA
+function renderPDCA() {
+  const p = P();
+  document.getElementById('weekLabel').textContent = `${getWeekRange(p.currentWeek)} 주`;
+  const data = p.pdca[p.currentWeek] || {};
+  document.querySelectorAll('[data-pdca]').forEach(el => {
+    el.value = data[el.dataset.pdca] || '';
+  });
+}
+function changeWeek(delta) {
+  const p = P();
+  const [y,m,d] = p.currentWeek.split('-').map(Number);
+  const dt = new Date(y, m-1, d);
+  dt.setDate(dt.getDate() + delta * 7);
+  p.currentWeek = dateKey(dt);
+  saveState(); renderPDCA();
+}
+
+// Bindings
+function bindField(id, key) {
+  document.getElementById(id).addEventListener('input', e => { P()[key] = e.target.value; saveState(); });
+}
+bindField('yearGoal', 'yearGoal');
+bindField('problem', 'problem');
+bindField('numberLang', 'numberLang');
+bindField('customerLang', 'customerLang');
+bindField('boundaryDecl', 'boundaryDecl');
+
+document.getElementById('startDate').addEventListener('change', e => { P().startDate = e.target.value; saveState(); renderProgress(); });
+document.getElementById('endDate').addEventListener('change', e => { P().endDate = e.target.value; saveState(); renderProgress(); });
+
+document.querySelectorAll('[data-principle]').forEach(el => {
+  el.addEventListener('input', () => {
+    const p = P();
+    if (!p.principles) p.principles = ['','',''];
+    p.principles[el.dataset.principle] = el.value;
+    saveState();
+  });
+});
+
+document.getElementById('addTask').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.value.trim()) {
+    P().tasks.push({ id: uid(), text: e.target.value.trim(), done: false, category: 'pruned' });
+    e.target.value = '';
+    saveState(); renderTasks();
+  }
+});
+
+document.querySelectorAll('[data-pdca]').forEach(el => {
+  el.addEventListener('input', () => {
+    const p = P();
+    if (!p.pdca[p.currentWeek]) p.pdca[p.currentWeek] = {};
+    p.pdca[p.currentWeek][el.dataset.pdca] = el.value;
+    saveState();
+  });
+});
+
+function toggleTheme() {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  saveState(); render();
+}
+
+// ===== 내보내기 / 가져오기 (여러 기기 간 수동 동기화) =====
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const today = dateKey(new Date());
+  a.href = url;
+  a.download = `boundary-trus-${today}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'application/json,.json';
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const imported = JSON.parse(text);
+      if (!imported || !imported.projects) {
+        alert('올바른 바운더리 대시보드 JSON 파일이 아니에요.');
+        return;
+      }
+      if (!confirm('현재 이 기기의 데이터가 이 파일로 덮어쓰기 됩니다. 진행할까요?')) return;
+      state = migrate(imported);
+      saveState();
+      render();
+      alert('✓ 가져오기 완료!');
+    } catch (err) {
+      alert('파일을 읽지 못했어요: ' + err.message);
+    }
+  };
+  input.click();
+}
+
+function copyToNotion() {
+  const p = P();
+  const wk = p.pdca[p.currentWeek] || {};
+  const t80 = p.tasks.filter(t => t.category === '80');
+  const t20 = p.tasks.filter(t => t.category === '20');
+  const pruned = p.tasks.filter(t => t.category === 'pruned');
+  const thisWeekGoal = p.weeklyGoals[p.currentWeek] || '';
+  const pr = p.principles || ['','',''];
+
+  // 이번달 우선순위 수집
+  const month = p.currentMonth;
+  const priorityEvents = [null, null, null];
+  Object.entries(p.events).forEach(([date, evs]) => {
+    if (date.slice(0,7) !== month) return;
+    (evs || []).forEach(ev => {
+      if (ev.priority && ev.priority >= 1 && ev.priority <= 3) {
+        priorityEvents[ev.priority - 1] = { date, text: ev.text };
+      }
+    });
+  });
+  const priLine = (i) => priorityEvents[i] ? `${priorityEvents[i].date} · ${priorityEvents[i].text}` : '—';
+
+  const md = `# 📅 [${p.name}] ${getWeekRange(p.currentWeek)} 주 — PDCA
+
+> **2026 목표:** ${p.yearGoal || '—'}
+> **3개월 바운더리:** ${p.boundaryDecl || '—'}
+> **문제:** ${p.problem || '—'}
+> **숫자언어:** ${p.numberLang || '—'} | **고객언어:** ${p.customerLang || '—'}
+> **이번 주 성과 목표:** ${thisWeekGoal || '—'}
+
+## 📜 3원칙
+1. ${pr[0] || '—'}
+2. ${pr[1] || '—'}
+3. ${pr[2] || '—'}
+
+## 📌 이번 달 우선순위 TOP 3 (${month})
+1. ${priLine(0)}
+2. ${priLine(1)}
+3. ${priLine(2)}
+
+## 📋 Plan
+${wk.plan || '—'}
+
+## 🏃 Do
+${wk.do || '—'}
+
+## 🔍 Check
+${wk.check || '—'}
+
+## ⚙️ Act
+${wk.act || '—'}
+
+## 🔥 80% 에너지
+${t80.map(t => `- [${t.done?'x':' '}] ${t.text}`).join('\n') || '—'}
+
+## ⚡ 20% 에너지
+${t20.map(t => `- [${t.done?'x':' '}] ${t.text}`).join('\n') || '—'}
+
+## ✂️ 가지치기 (큰 에너지 쓰지 말 것)
+${pruned.map(t => `- ${t.text}`).join('\n') || '—'}
+`;
+  navigator.clipboard.writeText(md).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.classList.add('copied');
+    btn.textContent = '✓ 복사됨! Notion에 Ctrl+V';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.textContent = '📋 이번 주 기록 Notion용으로 복사';
+    }, 2500);
+  });
+}
+
+render();
+setInterval(renderProgress, 60000);
+</script>
+
+</body>
+</html>
