@@ -1930,6 +1930,7 @@ const SUPABASE_KEY = 'sb_publishable_6sfU-FhpXkezTCMbrdtuTg_2Dmhp5qG';
 window.sb = null;         // Supabase 클라이언트
 window.sbUser = null;     // 로그인한 사용자
 window.cloudRowId = null; // 클라우드 상태 row ID (upsert용)
+window.workspaceId = null; // 팀 워크스페이스 ID (TRUS 등 공유 공간)
 
 async function loginWithGoogle() {
   const loadingEl = document.getElementById('authLoading');
@@ -1970,7 +1971,7 @@ async function logout() {
 }
 
 async function saveToCloud() {
-  if (!window.sb || !window.sbUser) return;
+  if (!window.sb || !window.sbUser || !window.workspaceId) return;
   try {
     if (window.cloudRowId) {
       const { error } = await window.sb.from('projects')
@@ -1979,7 +1980,12 @@ async function saveToCloud() {
       if (error) console.error('Cloud update error', error);
     } else {
       const { data, error } = await window.sb.from('projects')
-        .insert({ user_id: window.sbUser.id, name: 'state', data: state })
+        .insert({
+          workspace_id: window.workspaceId,
+          user_id: window.sbUser.id,
+          name: 'state',
+          data: state
+        })
         .select('id')
         .single();
       if (error) {
@@ -1993,12 +1999,29 @@ async function saveToCloud() {
   }
 }
 
-async function loadFromCloud() {
+async function fetchWorkspace() {
   if (!window.sb || !window.sbUser) return null;
+  try {
+    const { data, error } = await window.sb
+      .from('workspace_members')
+      .select('workspace_id')
+      .eq('user_id', window.sbUser.id)
+      .limit(1)
+      .maybeSingle();
+    if (error) { console.error('Workspace fetch error', error); return null; }
+    return data?.workspace_id || null;
+  } catch (e) {
+    console.error('fetchWorkspace error', e);
+    return null;
+  }
+}
+
+async function loadFromCloud() {
+  if (!window.sb || !window.sbUser || !window.workspaceId) return null;
   try {
     const { data, error } = await window.sb.from('projects')
       .select('id, data, updated_at')
-      .eq('user_id', window.sbUser.id)
+      .eq('workspace_id', window.workspaceId)
       .order('updated_at', { ascending: false })
       .limit(1);
     if (error) { console.error('Cloud fetch error', error); return null; }
@@ -2018,6 +2041,13 @@ async function postLogin(session) {
   const name = session.user.user_metadata?.full_name || session.user.email;
   const userEl = document.getElementById('authUserName');
   if (userEl) userEl.textContent = name;
+
+  // 워크스페이스 확인 (팀 공유 공간)
+  window.workspaceId = await fetchWorkspace();
+  if (!window.workspaceId) {
+    showAuthReject('워크스페이스를 찾을 수 없어요. 관리자에게 문의하세요.');
+    return;
+  }
 
   // 클라우드 데이터 확인
   const cloudState = await loadFromCloud();
@@ -2069,6 +2099,7 @@ function initSupabase(retries) {
     } else if (event === 'SIGNED_OUT') {
       window.sbUser = null;
       window.cloudRowId = null;
+      window.workspaceId = null;
     }
   });
 }
