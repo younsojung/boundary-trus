@@ -773,6 +773,47 @@
     border-color: var(--pink);
   }
   .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+
+  /* 삭제 확인 모달 */
+  .confirm-content {
+    max-width: 380px;
+    text-align: center;
+    padding: 32px 28px 24px;
+  }
+  .confirm-icon { font-size: 40px; margin-bottom: 10px; }
+  .confirm-title {
+    font-weight: 800;
+    font-size: 18px;
+    color: var(--text);
+    margin-bottom: 10px;
+    letter-spacing: -0.02em;
+  }
+  .confirm-message {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    word-break: keep-all;
+  }
+  .confirm-sub {
+    font-size: 12px;
+    color: var(--text-subtle);
+    margin-bottom: 22px;
+  }
+  .confirm-actions { justify-content: center; gap: 10px; }
+  .confirm-actions .btn {
+    min-width: 110px;
+    padding: 11px 18px;
+    font-weight: 700;
+  }
+  .btn-danger {
+    background: var(--pink);
+    color: #fff;
+    border-color: var(--pink);
+  }
+  .btn-danger:hover {
+    background: var(--pink-hover);
+    border-color: var(--pink-hover);
+  }
   .btn {
     padding: 9px 16px;
     border-radius: 10px;
@@ -863,13 +904,99 @@
     .tick-label { top: 82px; }
     .tick-label .lang-item input { width: 90px; }
   }
+
+  /* 로그인 게이트 */
+  body.auth-pending > *:not(#authGate) { display: none !important; }
+  body:not(.auth-pending) #authGate { display: none; }
+  #authGate {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: var(--bg);
+  }
+  .auth-box {
+    background: var(--surface);
+    border-radius: 24px;
+    padding: 48px 36px;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    max-width: 420px;
+    width: 100%;
+  }
+  .auth-box h1 {
+    font-size: 22px;
+    margin: 0 0 8px;
+    color: var(--text);
+  }
+  .auth-box .brand-suffix { color: var(--pink); }
+  .auth-box p {
+    color: var(--text-dim);
+    margin: 0 0 28px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  #googleSignIn { display: flex; justify-content: center; }
+  .auth-reject {
+    margin-top: 22px;
+    padding: 12px 14px;
+    background: var(--pink-bg);
+    color: var(--pink);
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+  .auth-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-right: 8px;
+  }
+  .auth-user-name {
+    font-weight: 700;
+    color: var(--text);
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .logout-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    color: var(--text-dim);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .logout-btn:hover { background: var(--surface-2); color: var(--text); }
 </style>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body>
+<body class="auth-pending">
+
+<div id="authGate">
+  <div class="auth-box">
+    <h1>🎯 바운더리 일정관리 <span class="brand-suffix">_TRUS</span></h1>
+    <p>허용된 구글 계정으로만 접근 가능합니다.<br>팀원이 아니면 접속이 차단돼요.</p>
+    <div id="googleSignIn"></div>
+    <div id="authReject" class="auth-reject" style="display:none;"></div>
+  </div>
+</div>
+
 
 <div class="topbar">
   <h1>🎯 바운더리 일정관리 <span class="brand-suffix">_TRUS</span></h1>
-  <div style="display:flex; gap:6px;">
+  <div style="display:flex; gap:6px; align-items:center;">
+    <div class="auth-user">
+      <span class="auth-user-name" id="authUserName"></span>
+      <button class="logout-btn" onclick="logout()">로그아웃</button>
+    </div>
     <button class="icon-btn" onclick="exportData()" title="JSON으로 내보내기 (백업/다른 기기 이동)">📤</button>
     <button class="icon-btn" onclick="importData()" title="JSON 가져오기">📥</button>
     <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
@@ -931,7 +1058,6 @@
       <span>🗓 <input type="date" id="startDate"></span>
       <span>→ <input type="date" id="endDate"></span>
       <span class="dday" id="ddayDisplay">D-?</span>
-      <a class="notion-link" href="https://www.notion.so/3329073fdb968140a180da5e0a7bee53" target="_blank">Notion ↗</a>
     </div>
     <div class="progress"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
     <div class="progress-text">
@@ -1055,7 +1181,38 @@
   </div>
 </div>
 
+<!-- 삭제 확인 모달 -->
+<div class="modal" id="confirmModal">
+  <div class="modal-content confirm-content">
+    <div class="confirm-icon">⚠️</div>
+    <div class="confirm-title">정말 삭제하실 건가요?</div>
+    <div class="confirm-message" id="confirmMessage"></div>
+    <div class="confirm-sub">삭제하면 되돌릴 수 없어요.</div>
+    <div class="modal-actions confirm-actions">
+      <button class="btn" id="confirmCancel">취소</button>
+      <button class="btn btn-danger" id="confirmOk">삭제하기</button>
+    </div>
+  </div>
+</div>
+
 <script>
+function showConfirm(message) {
+  return new Promise(resolve => {
+    const modal = document.getElementById('confirmModal');
+    document.getElementById('confirmMessage').textContent = message;
+    const ok = document.getElementById('confirmOk');
+    const cancel = document.getElementById('confirmCancel');
+    const close = (result) => {
+      modal.classList.remove('open');
+      ok.onclick = null; cancel.onclick = null; modal.onclick = null;
+      resolve(result);
+    };
+    ok.onclick = () => close(true);
+    cancel.onclick = () => close(false);
+    modal.onclick = (e) => { if (e.target === modal) close(false); };
+    modal.classList.add('open');
+  });
+}
 function pad(n) { return String(n).padStart(2, '0'); }
 function dateKey(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 function monthKey(d) { return `${d.getFullYear()}-${pad(d.getMonth()+1)}`; }
@@ -1076,17 +1233,17 @@ function uid() { return Date.now().toString(36) + Math.random().toString(36).sli
 
 const KEY = 'boundary_trus_v3';
 
-function makeProject(name, preset = false) {
+function makeProject(name) {
   return {
-    name: name || '새 프로젝트',
+    name: name || '내 첫 프로젝트',
     yearGoal: '',
     problem: '',
     numberLang: '',
     customerLang: '',
-    boundaryDecl: preset ? "2026년 4월 - 7월 | 3개월, 온라인 앤드엔 '만개' 판매를 달성한다." : '',
+    boundaryDecl: '',
     principles: ['', '', ''],
-    startDate: preset ? '2026-03-29' : dateKey(new Date()),
-    endDate: preset ? '2026-06-29' : (() => { const d = new Date(); d.setMonth(d.getMonth()+3); return dateKey(d); })(),
+    startDate: dateKey(new Date()),
+    endDate: (() => { const d = new Date(); d.setMonth(d.getMonth()+3); return dateKey(d); })(),
     tasks: [],
     events: {},          // { 'YYYY-MM-DD': [{text, priority: null|1|2|3}] }
     pdca: {},
@@ -1101,7 +1258,7 @@ function initialState() {
   return {
     theme: 'light',
     currentProjectId: pid,
-    projects: { [pid]: { ...makeProject('앤드엔 번들', true) } }
+    projects: { [pid]: { ...makeProject('내 첫 프로젝트') } }
   };
 }
 
@@ -1212,10 +1369,11 @@ function renderProjectTabs() {
       };
       const del = document.createElement('button');
       del.className = 'tab-action'; del.textContent = '×'; del.title = '삭제';
-      del.onclick = (e) => {
+      del.onclick = async (e) => {
         e.stopPropagation();
         if (Object.keys(state.projects).length === 1) { alert('프로젝트가 최소 1개는 있어야 해요.'); return; }
-        if (!confirm(`"${p.name}" 프로젝트를 삭제할까요?`)) return;
+        const ok = await showConfirm(`"${p.name}" 프로젝트를 삭제합니다.`);
+        if (!ok) return;
         delete state.projects[pid];
         if (state.currentProjectId === pid) state.currentProjectId = Object.keys(state.projects)[0];
         saveState(); render();
@@ -1750,6 +1908,85 @@ ${pruned.map(t => `- ${t.text}`).join('\n') || '—'}
 
 render();
 setInterval(renderProgress, 60000);
+
+/* ──────── Google 로그인 게이트 ──────── */
+const GOOGLE_CLIENT_ID = '696971973817-hpfjav2lgthj5471augriqr52acu728k.apps.googleusercontent.com';
+const ALLOWED_EMAILS = ['insung.inq@gmail.com', 'elekwww@gmail.com'];
+
+function parseJwt(token) {
+  const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+  const json = decodeURIComponent(atob(base64).split('').map(c =>
+    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+  return JSON.parse(json);
+}
+
+function handleCredentialResponse(response) {
+  try {
+    const payload = parseJwt(response.credential);
+    const email = (payload.email || '').toLowerCase();
+    const rejectEl = document.getElementById('authReject');
+    if (!ALLOWED_EMAILS.includes(email)) {
+      rejectEl.style.display = 'block';
+      rejectEl.innerHTML = `❌ <strong>${email}</strong>은(는) 허용된 계정이 아니에요.<br>다른 계정으로 다시 시도해주세요.`;
+      if (window.google?.accounts?.id) google.accounts.id.disableAutoSelect();
+      return;
+    }
+    rejectEl.style.display = 'none';
+    sessionStorage.setItem('auth_email', email);
+    sessionStorage.setItem('auth_name', payload.name || email);
+    unlockDashboard();
+  } catch (e) {
+    console.error('Auth error', e);
+  }
+}
+
+function unlockDashboard() {
+  document.body.classList.remove('auth-pending');
+  const name = sessionStorage.getItem('auth_name') || sessionStorage.getItem('auth_email') || '';
+  const userEl = document.getElementById('authUserName');
+  if (userEl) userEl.textContent = name;
+}
+
+function logout() {
+  sessionStorage.removeItem('auth_email');
+  sessionStorage.removeItem('auth_name');
+  if (window.google?.accounts?.id) google.accounts.id.disableAutoSelect();
+  location.reload();
+}
+
+function initGoogleAuth(retries) {
+  if (retries === undefined) retries = 30;
+  if (!window.google || !google.accounts || !google.accounts.id) {
+    if (retries <= 0) return;
+    setTimeout(() => initGoogleAuth(retries - 1), 200);
+    return;
+  }
+  google.accounts.id.initialize({
+    client_id: GOOGLE_CLIENT_ID,
+    callback: handleCredentialResponse,
+    auto_select: false,
+    cancel_on_tap_outside: false,
+  });
+  const btnEl = document.getElementById('googleSignIn');
+  if (btnEl) {
+    google.accounts.id.renderButton(btnEl, {
+      theme: 'filled_black',
+      size: 'large',
+      shape: 'pill',
+      text: 'signin_with',
+      locale: 'ko',
+    });
+  }
+}
+
+(function bootAuth() {
+  const savedEmail = sessionStorage.getItem('auth_email');
+  if (savedEmail && ALLOWED_EMAILS.includes(savedEmail)) {
+    unlockDashboard();
+  } else {
+    initGoogleAuth();
+  }
+})();
 </script>
 
 </body>
