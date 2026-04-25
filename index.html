@@ -437,6 +437,33 @@
 
   /* Calendar */
   .cal-nav { display: flex; gap: 8px; align-items: center; font-size: 15px; font-weight: 700; }
+  .month-goal-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--pink-bg);
+    border-left: 3px solid var(--pink);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 0 0 14px;
+  }
+  .month-goal-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--pink);
+    white-space: nowrap;
+  }
+  .month-goal-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    outline: none;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 0;
+  }
+  .month-goal-input::placeholder { color: var(--text-subtle); font-weight: 400; }
   .cal-nav button {
     background: var(--surface-2);
     border: 1px solid var(--border);
@@ -485,9 +512,9 @@
   .cal-date.sun { color: #ef4444; }
   .cal-date.sat { color: #3b82f6; }
   .cal-event {
-    background: var(--pink-bg);
-    color: var(--pink);
-    border-left: 2px solid var(--pink);
+    background: var(--surface-2);
+    color: var(--text);
+    border-left: 2px solid var(--border);
     padding: 3px 5px;
     border-radius: 4px;
     font-size: 10px;
@@ -497,13 +524,38 @@
     white-space: nowrap;
     font-weight: 600;
   }
+  .cal-event.work {
+    background: #1f2937;
+    color: #f9fafb;
+    border-left-color: #111827;
+    font-weight: 600;
+  }
+  .cal-event.personal {
+    background: #f3f4f6;
+    color: #6b7280;
+    border-left-color: #9ca3af;
+    font-weight: 500;
+  }
+  [data-theme="dark"] .cal-event.work {
+    background: #e5e7eb;
+    color: #111827;
+    border-left-color: #9ca3af;
+  }
+  [data-theme="dark"] .cal-event.personal {
+    background: #374151;
+    color: #9ca3af;
+    border-left-color: #6b7280;
+  }
   .cal-event.priority {
-    background: var(--pink);
-    color: white;
-    border-left-color: white;
+    background: var(--pink) !important;
+    color: white !important;
+    border-left-color: white !important;
     font-weight: 800;
     box-shadow: 0 1px 3px rgba(255,0,153,0.3);
   }
+  /* 지나간 날짜는 흐리게 */
+  .cal-day.past { opacity: 0.45; }
+  .cal-day.past.today { opacity: 1; }
   .cal-priority-strip {
     display: flex;
     gap: 3px;
@@ -772,6 +824,49 @@
     color: white;
     border-color: var(--pink);
   }
+  .cat-toggle {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .cat-btn {
+    border: none;
+    background: var(--surface-2);
+    padding: 5px 9px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--text-subtle);
+    transition: background .15s;
+  }
+  .cat-btn:hover { background: var(--border); }
+  .cat-btn.active.work {
+    background: #1f2937;
+    color: white;
+  }
+  .cat-btn.active.personal {
+    background: #9ca3af;
+    color: white;
+  }
+  [data-theme="dark"] .cat-btn.active.work {
+    background: #e5e7eb;
+    color: #111827;
+  }
+  .move-btn {
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    border-radius: 6px;
+    width: 22px; height: 22px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-subtle);
+    padding: 0;
+    line-height: 1;
+  }
+  .move-btn:hover:not(:disabled) { border-color: var(--pink); color: var(--pink); }
+  .move-btn:disabled { opacity: 0.25; cursor: not-allowed; }
   .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
 
   /* 삭제 확인 모달 */
@@ -1101,6 +1196,10 @@
       <button onclick="changeMonth(1)">▶</button>
     </div>
   </div>
+  <div class="month-goal-row">
+    <label class="month-goal-label" id="monthGoalLabel">이번 달 성과 목표</label>
+    <input type="text" id="monthGoalInput" class="month-goal-input" placeholder="예: 4월 매출 1억 달성 / 신규 가입자 1,000명">
+  </div>
   <div class="cal-grid" id="calGrid"></div>
 </div>
 
@@ -1178,7 +1277,10 @@
 <div class="modal" id="eventModal">
   <div class="modal-content">
     <div class="modal-header" id="modalDate">날짜</div>
-    <div class="modal-hint">각 일정 옆 <b>1 / 2 / 3</b> 버튼 = 이번 달 우선순위 지정. 새로 1번에 등록하면 기존 1→2, 2→3으로 밀려납니다.</div>
+    <div class="modal-hint">
+      <b>업무/개인</b>으로 분류, <b>↑↓</b>로 순서 변경, <b>1/2/3</b>으로 이번 달 우선순위 지정.<br>
+      우선순위는 <b>월별로 독립</b> — 4월 1순위와 5월 1순위는 서로 다릅니다. 1번에 새로 등록하면 기존 1→2, 2→3으로 밀려납니다.
+    </div>
     <div id="modalEvents" style="margin-bottom:10px;"></div>
     <input type="text" class="modal-input" id="newEventInput" placeholder="일정 추가 (Enter)">
     <div class="modal-actions">
@@ -1274,9 +1376,13 @@ function normalizeEvents(events) {
   const out = {};
   Object.entries(events).forEach(([date, arr]) => {
     out[date] = (arr || []).map(ev => {
-      if (typeof ev === 'string') return { text: ev, priority: null };
-      if (ev && typeof ev === 'object') return { text: ev.text || '', priority: ev.priority ?? null };
-      return { text: String(ev), priority: null };
+      if (typeof ev === 'string') return { text: ev, priority: null, category: 'work' };
+      if (ev && typeof ev === 'object') return {
+        text: ev.text || '',
+        priority: ev.priority ?? null,
+        category: ev.category === 'personal' ? 'personal' : 'work'
+      };
+      return { text: String(ev), priority: null, category: 'work' };
     });
   });
   return out;
@@ -1555,6 +1661,14 @@ function renderCalendar() {
 
   document.getElementById('calMonthLabel').textContent = `${yr}년 ${mo}월`;
   document.getElementById('goalsMonthLabel').textContent = `${yr}년 ${mo}월`;
+  // 월간 성과 목표 입력란 동기화
+  const mgLabel = document.getElementById('monthGoalLabel');
+  const mgInput = document.getElementById('monthGoalInput');
+  if (mgLabel) mgLabel.textContent = `${mo}월 성과 목표`;
+  if (mgInput) {
+    if (!p.monthlyGoals) p.monthlyGoals = {};
+    mgInput.value = p.monthlyGoals[p.currentMonth] || '';
+  }
 
   const grid = document.getElementById('calGrid');
   grid.innerHTML = '';
@@ -1581,11 +1695,17 @@ function renderCalendar() {
     cells.push({ day: nextDay++, year: ny, month: nm, otherMonth: true });
   }
 
+  const todayObj = new Date();
+  const todayMidnight = new Date(todayObj.getFullYear(), todayObj.getMonth(), todayObj.getDate());
+
   cells.forEach((c, idx) => {
     const cell = document.createElement('div');
     cell.className = 'cal-day' + (c.otherMonth ? ' other-month' : '');
     const key = `${c.year}-${pad(c.month)}-${pad(c.day)}`;
     if (key === todayKey) cell.classList.add('today');
+    // 지나간 날짜 흐리게 (오늘은 제외)
+    const cellDate = new Date(c.year, c.month - 1, c.day);
+    if (cellDate < todayMidnight) cell.classList.add('past');
 
     const dateEl = document.createElement('div');
     dateEl.className = 'cal-date';
@@ -1606,7 +1726,11 @@ function renderCalendar() {
     const badges = ['①','②','③'];
     visible.forEach(ev => {
       const e = document.createElement('div');
-      e.className = 'cal-event' + (ev.priority ? ' priority' : '');
+      let cls = 'cal-event';
+      if (ev.priority) cls += ' priority';
+      else if (ev.category === 'personal') cls += ' personal';
+      else cls += ' work';
+      e.className = cls;
       const prefix = ev.priority ? `${badges[ev.priority-1]} ` : '';
       e.textContent = prefix + ev.text;
       e.title = ev.text;
@@ -1695,6 +1819,28 @@ function closeModal() {
   document.getElementById('eventModal').classList.remove('open');
   renderCalendar();
 }
+function moveEvent(date, idx, dir) {
+  const p = P();
+  const arr = p.events[date];
+  if (!arr) return;
+  const j = idx + dir;
+  if (j < 0 || j >= arr.length) return;
+  [arr[idx], arr[j]] = [arr[j], arr[idx]];
+  saveState();
+  renderModalEvents();
+  renderCalendar();
+}
+
+function setEventCategory(date, idx, cat) {
+  const p = P();
+  const ev = p.events[date]?.[idx];
+  if (!ev) return;
+  ev.category = cat;
+  saveState();
+  renderModalEvents();
+  renderCalendar();
+}
+
 function renderModalEvents() {
   const p = P();
   const list = document.getElementById('modalEvents');
@@ -1708,6 +1854,31 @@ function renderModalEvents() {
     inp.value = ev.text;
     inp.onchange = () => { ev.text = inp.value; saveState(); renderCalendar(); };
     row.append(inp);
+
+    // 개인 / 업무 토글
+    const cat = document.createElement('div');
+    cat.className = 'cat-toggle';
+    const currentCat = ev.category === 'personal' ? 'personal' : 'work';
+    [['work','업무'],['personal','개인']].forEach(([val, label]) => {
+      const b = document.createElement('button');
+      b.className = 'cat-btn ' + val + (currentCat === val ? ' active' : '');
+      b.textContent = label;
+      b.title = val === 'work' ? '업무 일정 (검정)' : '개인 일정 (회색)';
+      b.onclick = () => setEventCategory(modalDate, i, val);
+      cat.append(b);
+    });
+    row.append(cat);
+
+    // 순서 위/아래
+    const up = document.createElement('button');
+    up.className = 'move-btn'; up.textContent = '↑'; up.title = '위로';
+    up.disabled = i === 0;
+    up.onclick = () => moveEvent(modalDate, i, -1);
+    const down = document.createElement('button');
+    down.className = 'move-btn'; down.textContent = '↓'; down.title = '아래로';
+    down.disabled = i === events.length - 1;
+    down.onclick = () => moveEvent(modalDate, i, 1);
+    row.append(up, down);
 
     [1,2,3].forEach(n => {
       const btn = document.createElement('button');
@@ -1737,7 +1908,7 @@ document.getElementById('newEventInput').addEventListener('keydown', e => {
   const p = P();
   if (e.key === 'Enter' && e.target.value.trim() && modalDate) {
     if (!p.events[modalDate]) p.events[modalDate] = [];
-    p.events[modalDate].push({ text: e.target.value.trim(), priority: null });
+    p.events[modalDate].push({ text: e.target.value.trim(), priority: null, category: 'work' });
     e.target.value = '';
     saveState(); renderModalEvents(); renderCalendar();
   }
@@ -1773,6 +1944,14 @@ bindField('problem', 'problem');
 bindField('numberLang', 'numberLang');
 bindField('customerLang', 'customerLang');
 bindField('boundaryDecl', 'boundaryDecl');
+
+// 월간 성과 목표 (월별로 독립 저장)
+document.getElementById('monthGoalInput').addEventListener('input', e => {
+  const p = P();
+  if (!p.monthlyGoals) p.monthlyGoals = {};
+  p.monthlyGoals[p.currentMonth] = e.target.value;
+  saveState();
+});
 
 document.getElementById('startDate').addEventListener('change', e => { P().startDate = e.target.value; saveState(); renderProgress(); });
 document.getElementById('endDate').addEventListener('change', e => { P().endDate = e.target.value; saveState(); renderProgress(); });
