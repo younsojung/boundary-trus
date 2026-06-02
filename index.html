@@ -1071,9 +1071,10 @@
   }
   .logout-btn:hover { background: var(--surface-2); color: var(--text); }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase 제거 (2026-06-02): 옛 프로젝트가 삭제되어 NXDOMAIN. localStorage 단독 모드로 전환. -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> -->
 </head>
-<body class="auth-pending">
+<body><!-- 인증 게이트 해제 (Supabase 제거됨) -->
 
 <div id="authGate">
   <div class="auth-box">
@@ -2103,8 +2104,9 @@ render();
 setInterval(renderProgress, 60000);
 
 /* ──────── Supabase 인증 + 클라우드 동기화 ──────── */
-const SUPABASE_URL = 'https://eikmldnslpsnjrigxdpo.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_6sfU-FhpXkezTCMbrdtuTg_2Dmhp5qG';
+// Supabase 비활성 — 옛 프로젝트(eikmldns...)는 삭제됨. 모든 cloud 함수는 가드로 noop.
+const SUPABASE_URL = '';
+const SUPABASE_KEY = '';
 
 window.sb = null;         // Supabase 클라이언트
 window.sbUser = null;     // 로그인한 사용자
@@ -2283,7 +2285,7 @@ function initSupabase(retries) {
   });
 }
 
-initSupabase();
+// initSupabase();  // 비활성 (CDN·프로젝트 제거됨)
 </script>
 
 </body>
